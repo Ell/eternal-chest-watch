@@ -51,7 +51,7 @@ const ping = async (connection) => {
 
     log('> PING');
 
-    return sendMessage(connection, payload);
+    sendMessage(connection, payload);
 };
 
 const handleMessage = async (connection, message) => {
@@ -100,7 +100,7 @@ const setupWatcher = async (channelId, config, retries = 0) => {
 
     await authenticate(connection, config.jwt);
 
-    setTimeout(() => ping(connection), 10000);
+    setInterval(() => ping(connection), 10000);
 
     connection.on('message', (payload) => {
         const message = JSON.parse(payload.utf8Data);
@@ -114,7 +114,7 @@ const setupWatcher = async (channelId, config, retries = 0) => {
         console.log('connection closed for', channelId)
         console.log('reconnecting', channelId);
 
-        connect(channelId, config, retries + 1);
+        setupWatcher(channelId, config, retries + 1);
     });
 }
 
