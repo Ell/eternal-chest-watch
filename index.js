@@ -87,6 +87,7 @@ const handleMessage = async (connection, message) => {
             setTimeout(async () => {
                 await sendMessage(connection, reply);
                 console.log('Drop Accepted:', nonce);
+                notify('', 'Drop Accepted.')
             }, timeout);
 
             return;
