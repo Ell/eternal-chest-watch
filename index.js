@@ -88,6 +88,36 @@ const handleMessage = async (connection, message) => {
     }
 }
 
+const setupWatcher = async (channelId, config, retries = 0) => {
+    log(`connection to channel ${channelId}`);
+
+    if (retries > 3) {
+        console.log('aborting reconnections after too many failures');
+        return;
+    }
+
+    const connection = await connect(channelId);
+
+    await authenticate(connection, config.jwt);
+
+    setTimeout(() => ping(connection), 10000);
+
+    connection.on('message', (payload) => {
+        const message = JSON.parse(payload.utf8Data);
+
+        handleMessage(connection, message);
+    });
+
+    connection.on('error', (error) => console.log('connection error:', error));
+
+    connection.on('close', () => {
+        console.log('connection closed for', channelId)
+        console.log('reconnecting', channelId);
+
+        connect(channelId, config, retries + 1);
+    });
+}
+
 const run = async () => {
     if (process.argv.length < 3) {
         console.log('missing configuration path argument');
@@ -101,25 +131,7 @@ const run = async () => {
         process.exit();
     }
 
-    config.channels.map(async channelId => {
-        log(`connection to channel ${channelId}`);
-
-        const connection = await connect(channelId);
-
-        await authenticate(connection, config.jwt);
-
-        setTimeout(() => ping(connection), 10000);
-
-        connection.on('message', (payload) => {
-            const message = JSON.parse(payload.utf8Data);
-
-            handleMessage(connection, message);
-        });
-
-        connection.on('error', (error) => console.log('connection error:', error));
-
-        connection.on('close', () => console.log('connection closed'));
-    });
+    config.channels.map(async channelId => setupWatcher(channelId, config));
 };
 
 run();
