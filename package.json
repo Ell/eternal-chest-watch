@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^6.0.0",
     "websocket": "^1.0.28"
   }
 }
