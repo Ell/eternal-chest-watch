@@ -1,0 +1,4 @@
+notes/
+*.log
+node_modules/
+config.json
