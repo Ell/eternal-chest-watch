@@ -106,11 +106,15 @@ const setupWatcher = async (channelId, config, retries = 0) => {
         return;
     }
 
+    // Reset retries every 20 minutes if we're still connected
+    const retryTimer = setTimeout(() => retries = 0, 200000);
+
     const connection = await connect(channelId);
 
     await authenticate(connection, config.jwt);
 
-    setInterval(() => ping(connection), 10000);
+    // Ping dwd api every 10 seconds (stolen from extension code)
+    const interval = setInterval(() => ping(connection), 10000);
 
     connection.on('message', (payload) => {
         const message = JSON.parse(payload.utf8Data);
@@ -123,6 +127,9 @@ const setupWatcher = async (channelId, config, retries = 0) => {
     connection.on('close', () => {
         console.log('connection closed for', channelId)
         console.log('reconnecting', channelId);
+
+        clearTimeout(retryTimer);
+        clearInterval(interval);
 
         setupWatcher(channelId, config, retries + 1);
     });
