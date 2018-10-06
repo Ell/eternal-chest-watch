@@ -76,9 +76,10 @@ const handleMessage = async (connection, message) => {
 
             console.log(`Accepting drop in ${Math.floor(timeout / 1000)} seconds`);
 
-            setTimeout(async () => await sendMessage(connection, reply), timeout);
-
-            console.log('Drop Accepted!');
+            setTimeout(async () => {
+                await sendMessage(connection, reply);
+                console.log('Drop Accepted:', nonce);
+            }, timeout);
 
             return;
         }
