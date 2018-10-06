@@ -1,5 +1,10 @@
 const fs = require('fs');
 const ws = require('websocket');
+const notifier = require('node-notifier');
+
+const notify = (title, message) => {
+    notifier.notify({ title: 'Eternal Drop Watch: ' + title, message })
+}
 
 const log = (message) => {
     console.log(`${Date.now()} :: ${message}`);
@@ -74,7 +79,10 @@ const handleMessage = async (connection, message) => {
 
             const timeout = Math.random() * (50000 - 5000) + 5000;
 
-            console.log(`Accepting drop in ${Math.floor(timeout / 1000)} seconds`);
+            notify(
+                'New Eternal Chest Drop',
+                `You just got ${currencyGranted} currency! Accepting in ${Math.floor(timeout / 1000)} seconds.`
+            );
 
             setTimeout(async () => {
                 await sendMessage(connection, reply);
