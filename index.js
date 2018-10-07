@@ -109,7 +109,21 @@ const setupWatcher = async (channelId, config, retries = 0) => {
     // Reset retries every 20 minutes if we're still connected
     const retryTimer = setTimeout(() => retries = 0, 200000);
 
-    const connection = await connect(channelId);
+    let connection = null;
+
+    try {
+        connection = await connect(channelId);
+    } catch (e) {
+        log('connection failed, retrying in 30 seconds')
+
+        clearTimeout(retryTimer);
+
+        setTimeout(() => {
+            setupWatcher(channelId, config, retries + 1)
+        }, 30 * 1000);
+
+        return;
+    }
 
     await authenticate(connection, config.jwt);
 
